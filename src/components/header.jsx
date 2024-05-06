@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import SignInButton from './sign-in-button'
 
 export default function Header() {
   return (
@@ -14,7 +15,7 @@ export default function Header() {
         {/* Logo */}
 
         <Link href='/' className='hidden lg:inline-flex' >
-          <Image 
+          <Image
             src='/Instagram_logo_black.webp'
             width={96}
             height={96}
@@ -23,7 +24,7 @@ export default function Header() {
         </Link>
 
         <Link href='/' className='lg:hidden' >
-          <Image 
+          <Image
             src='/800px-Instagram_logo_2016.webp'
             width={40}
             height={40}
@@ -33,17 +34,15 @@ export default function Header() {
 
         {/* Search Input */}
 
-        <input 
+        <input
           type="text"
           placeholder='Search'
-          className='bg-gray-50 border border-gray-200 rounded text-sm w-full py-2 px-4 max-w-[210px]' 
+          className='bg-gray-50 border border-gray-200 rounded text-sm w-full py-2 px-4 max-w-[210px]'
         />
 
         {/* Menu Items */}
 
-        <button
-          className='text-sm font-semibold text-blue-500'
-        >Log in</button>
+        <SignInButton />
       </div>
     </header>
   )
