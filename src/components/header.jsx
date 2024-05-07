@@ -2,17 +2,69 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { useState } from 'react'
 import { IoIosAddCircle } from 'react-icons/io'
 import { HiCamera } from 'react-icons/hi'
 import { AiOutlineClose } from 'react-icons/ai'
 import Modal from 'react-modal'
+import { app } from '@/firebase'
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imageFileUrl, setImageFileUrl] = useState(null);
+  const [imageFileUploading, setImageFileUploading] = useState(false);
+
+  const filePickerRef = useRef(null)
   const { data: session } = useSession();
+
+  const addImageToPost = e => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setSelectedFile(file);
+      setImageFileUrl(URL.createObjectURL(file))
+      console.log(imageFileUrl)
+    }
+  }
+
+  useEffect(() => {
+    if (selectedFile) {
+      uploadImageToStorage();
+    }
+  }, [selectedFile])
+
+  const uploadImageToStorage = async () => {
+    setImageFileUploading(true);
+    const storage = getStorage(app);
+    const fileName = new Date().getTime() + '-' + selectedFile.name;
+    const storageRef = ref(storage, fileName);
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log(`Upload is ${progress}% done`)
+      },
+      (error) => {
+        console.error(error);
+        setImageFileUploading(false);
+        setImageFileUrl(null);
+        setSelectedFile(null);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref)
+          .then(downloadUrl => {
+            setImageFileUrl(downloadUrl);
+            setImageFileUploading(false);
+          });
+      }
+    );
+  }
 
   return (
     <header
@@ -83,17 +135,37 @@ export default function Header() {
             onRequestClose={() => setIsOpen(false)}
             ariaHideApp={false}
           >
-            <div 
+            <div
               className='flex flex-col justify-center items-center h-[100%]'
             >
-              <HiCamera 
-                className='text-5xl text-gray-400 cursor-pointer'
+              {
+                selectedFile ? (
+                  <img
+                    onClick={() => setSelectedFile(null)}
+                    src={imageFileUrl}
+                    alt='selected img'
+                    className={`w-full max-h-[250px] object-over cursor-pointer ${imageFileUploading ? 'animate-pulse' : ''}`}
+                  />
+                ) : (
+                  <HiCamera
+                    onClick={() => filePickerRef.current.click()}
+                    className='text-5xl text-gray-400 cursor-pointer'
+                  />
+                )
+              }
+
+              <input
+                type="file"
+                accept='image/*'
+                onChange={addImageToPost}
+                ref={filePickerRef}
+                hidden
               />
             </div>
 
-            <input 
-              type="text" 
-              maxLength='150' 
+            <input
+              type="text"
+              maxLength='150'
               placeholder='Please, enter your caption...'
               className='m-4 border-none text-center w-full focus:ring-0 outline-none'
             />
@@ -102,7 +174,7 @@ export default function Header() {
               className='w-full bg-red-600 text-white p-2 shadow-md rounded-lg hover:brightness-105 disabled:bg-gray-200 disabled:cursor-not-allowed disabled:brightness-100'
             >Upload Post</button>
 
-            <AiOutlineClose 
+            <AiOutlineClose
               className='cursor-pointer absolute top-2 right-2 hover:text-red-600 transition duration-300'
               onClick={() => setIsOpen(false)}
             />
