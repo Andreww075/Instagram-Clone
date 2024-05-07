@@ -11,12 +11,14 @@ export default function Feed() {
         <Posts />
       </section>
 
-      {/* MiniProfile [Right] */} 
-    
+      {/* MiniProfile [Right] */}
+
       <section className='hidden md:inline-grid md:col-span-1'>
-        <MiniProfile />
+        <div className='fixed w-[280px]'>
+          <MiniProfile />
+        </div>
       </section>
-    
+
     </main>
   )
 }
