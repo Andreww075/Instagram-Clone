@@ -13,8 +13,6 @@ export default async function Posts() {
     data.push({ id: doc.id, ...doc.data() })
   });
 
-  console.log(data)
-
   return <div>
     {
       data.map((post) => (
