@@ -30,8 +30,6 @@ export default function Header() {
   const { data: session } = useSession();
   const db = getFirestore(app);
 
-  console.log(session)
-
   const addImageToPost = e => {
     const file = e.target.files[0];
 
@@ -88,6 +86,7 @@ export default function Header() {
     })
     setPostUploading(false);
     setIsOpen(false);
+    location.reload();
   }
 
   return (
