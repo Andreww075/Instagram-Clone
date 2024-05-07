@@ -9,6 +9,13 @@ const handler = NextAuth ({
     }),
     // ...add more providers here
   ],
+  callbacks: {
+    async session({session, token}) {
+      session.user.username = session.user.name;
+      session.user.uid = token.sub;
+      return session;
+    }
+  }
 });
 
 
